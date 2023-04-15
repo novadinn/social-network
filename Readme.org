@@ -1,0 +1,11 @@
+#+STARTUP: overview 
+#+PROPERTY: header-args :comments yes :results silent
+#+OPTIONS: \n:t
+* Social Network
+This is a small social network written with golang. Currently under development.
+* Run
+To run the application, follow these instructions:
+#+BEGIN_SRC
+cd social-network
+go run cmd/main.go
+#+END_SRC

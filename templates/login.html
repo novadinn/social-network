@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta charset="utf-8">
+	<meta name="viewport" context="width=device-width, initial-scale=1.0">
+	<title>Social Network</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+  </head>
+  <body>
+
+	<header>
+	  <nav>
+		<a href="/">Home</a>
+		
+		{{if .Session.IsLoggedIn}}
+		<a href="/@{{.Session.User.Username}}">{{.Session.User.Username}}</a>
+		
+		<form action="/logout" method="POST" style="display: contents;">
+		  <button>Logout</button>
+		</form>
+		
+		{{else}}
+		<a href="/login">Login</a>
+		{{end}}
+	  </nav>
+	</header>
+	<hr>
+	
+	<main>
+	  <h1>Login</h1>
+	  
+	  <form action="/login" method="POST">
+		<div>
+		  <label for="email">Email</label>
+		  <input type="email" name="email" id="email" placeholder="mail@sample.org" value='{{$.Form.Get "email"}}' required>
+		</div>
+
+		{{with .Err}}
+		{{if or (eq .Error "user not found") (eq .Error "username taken") (eq .Error "invalid username")}}
+		<div>
+		  <label for="username">Username</label>
+		  <input type="text" name="username" id="username" placeholder="sample_name" value='{{$.Form.Get "username"}}' required>
+		</div>
+		{{end}}
+		{{end}}
+
+		{{with .Err}}
+		<p>Could not login: <code>{{.Error}}</code></p>
+		{{end}}
+		
+		<button>Login</button>
+	  </form>
+	</main>	
+  </body>
+</html>
