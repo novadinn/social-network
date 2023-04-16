@@ -29,6 +29,9 @@
 	<main>
 	  <h1>{{.User.Username}}</h1>
 
+	  <a href="/@{{.User.Username}}/following">Following</a>
+	  <a href="/@{{.User.Username}}/followers">Followers</a>
+	  
 	  {{if and .Session.IsLoggedIn (ne .Session.User.ID .User.ID)}}
 	  <form action="/user-follows" method="POST">
 		<input type="hidden" name="user_id" value="{{.User.ID}}">

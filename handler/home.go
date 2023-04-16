@@ -17,6 +17,7 @@ func (h *Handler) homeGetHandler() gin.HandlerFunc {
 				"Session": s,
 				"Error": err.Error(),
 			})
+			
 			return
 		}
 

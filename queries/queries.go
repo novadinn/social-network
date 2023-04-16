@@ -41,13 +41,6 @@ FOREIGN KEY (follower_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASC
 FOREIGN KEY (followed_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE, 
 PRIMARY KEY(follower_id, followed_id))`
 	
-	getUserByID = `SELECT * FROM users 
-WHERE id = ?`
-	getUserByEmail = `SELECT * FROM users 
-WHERE email = ?`
-	getUserByUsername = `SELECT * FROM users 
-WHERE username = ?`
-
 	createUser = `INSERT IGNORE INTO users (id, email, username, created_at) 
 VALUES (?, ?, ?, ?);`
 	createPost = `INSERT IGNORE INTO posts (id, user_id, content, created_at) 
@@ -56,6 +49,13 @@ VALUES (?, ?, ?, ?);`
 VALUES (?, ?, ?, ?, ?)`
 	createUserFolow = `INSERT IGNORE INTO user_follows (follower_id, followed_id, created_at) 
 VALUES (?, ?, ?);`
+
+	getUserByID = `SELECT * FROM users 
+WHERE id = ?`
+	getUserByEmail = `SELECT * FROM users 
+WHERE email = ?`
+	getUserByUsername = `SELECT * FROM users 
+WHERE username = ?`
 	
 	getPosts = `SELECT posts.*, users.username 
 FROM posts 
@@ -83,6 +83,18 @@ FROM user_follows
 WHERE follower_id = ? AND followed_id = ?`
 	deleteUserFollow = `DELETE FROM user_follows 
 WHERE follower_id = ? AND followed_id = ?`
+	getFollowingByUsername = `SELECT users.* 
+FROM user_follows 
+INNER JOIN users ON user_follows.followed_id = users.id 
+WHERE follower_id = (SELECT users.id FROM users 
+WHERE username = ?)
+ORDER BY user_follows.followed_id;`
+	getFollowersByUsername = `SELECT users.* 
+FROM user_follows 
+INNER JOIN users ON user_follows.follower_id = users.id 
+WHERE followed_id = (SELECT users.id FROM users 
+WHERE username = ?)
+ORDER BY user_follows.follower_id;`
 )
 
 type Queries struct {
@@ -320,6 +332,50 @@ func (q *Queries) GetPostsByUsername(username string) ([]model.Post, error) {
     }
 
 	return posts, nil
+}
+
+func (q *Queries) GetFollowingByUsername(username string) ([]model.User, error) {
+	rows, err := q.db.Query(getFollowingByUsername, username)
+	if err != nil {
+		return nil, err
+	}
+
+	users := make([]model.User, 0)
+	for rows.Next() {
+		var user model.User
+		if err := rows.Scan(&user.ID, &user.Email, &user.Username, &user.CreatedAt); err != nil {
+			return users, err
+		}
+		users = append(users, user)
+	}
+
+	if err = rows.Err(); err != nil {
+        return users, err
+    }
+
+	return users, nil
+}
+
+func (q *Queries) GetFollowersByUsername(username string) ([]model.User, error) {
+	rows, err := q.db.Query(getFollowersByUsername, username)
+	if err != nil {
+		return nil, err
+	}
+
+	users := make([]model.User, 0)
+	for rows.Next() {
+		var user model.User
+		if err := rows.Scan(&user.ID, &user.Email, &user.Username, &user.CreatedAt); err != nil {
+			return users, err
+		}
+		users = append(users, user)
+	}
+
+	if err = rows.Err(); err != nil {
+        return users, err
+    }
+
+	return users, nil
 }
 
 func (q *Queries) GetPostByID(id string) (model.Post, error) {

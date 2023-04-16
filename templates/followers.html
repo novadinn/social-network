@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta charset="utf-8">
+	<meta name="viewport" context="width=device-width, initial-scale=1.0">
+	<title>Social Network</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+  </head>
+  
+  <body>
+	<header>
+	  <nav>
+		<a href="/">Home</a>
+		
+		{{if .Session.IsLoggedIn}}
+		<a href="/@{{.Session.User.Username}}">{{.Session.User.Username}}</a>
+		
+		<form action="/logout" method="POST" style="display: contents;">
+		  <button>Logout</button>
+		</form>
+		
+		{{else}}
+		<a href="/login">Login</a>
+		{{end}}
+	  </nav>
+	</header>
+	<hr>
+	
+	<main>
+	  <p>Following</p>
+	  {{if eq (len .Users) 0}}
+	  <p>No follows.</p>
+	  {{else}}
+	  {{range $user := .Users}}
+	  <a href="/@{{$user.Username}}">
+		<p>{{$user.Username}}</p>
+	  </a>
+	  {{end}}
+	  {{end}}
+	</main>
+  </body>
+  
+</html>

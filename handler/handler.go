@@ -40,6 +40,8 @@ func New() *Handler {
 	h.Router.POST("/posts", h.postsPostHandler())
 	h.Router.POST("/comments", h.commentsPostHandler())
 	h.Router.POST("/user-follows", h.userFollowPostHandler())
+	h.Router.GET("/@:username/following", h.userFollowingGetHandler())
+	h.Router.GET("/@:username/followers", h.userFollowersGetHandler())
 	h.Router.DELETE("/user-follows", h.userUnfollowDeleteHandler())
 	h.Router.GET("/@:username", h.userGetHandler())
 	h.Router.GET("/p/:id", h.postGetHandler())

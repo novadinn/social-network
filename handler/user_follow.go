@@ -41,3 +41,49 @@ func (h *Handler) userUnfollowDeleteHandler() gin.HandlerFunc {
 		http.Redirect(c.Writer, c.Request, c.Request.Referer(), http.StatusFound)
 	}
 }
+
+func (h *Handler) userFollowingGetHandler() gin.HandlerFunc {
+	return func (c *gin.Context) {
+		s := h.sessionFromRequest(c)
+		
+		username := c.Param("username")
+		users, err := h.Service.Queries.GetFollowingByUsername(username)
+		if err != nil {
+			h.Service.Logger.Print(err)
+			c.HTML(http.StatusOK, "err.html", gin.H{
+				"Session": s,
+				"Error": err.Error(),
+			})
+			
+			return
+		}
+
+		c.HTML(http.StatusOK, "following.html", gin.H{
+			"Session": s,
+			"Users": users,
+		})
+	}
+}
+
+func (h *Handler) userFollowersGetHandler() gin.HandlerFunc {
+	return func (c *gin.Context) {
+		s := h.sessionFromRequest(c)
+		
+		username := c.Param("username")
+		users, err := h.Service.Queries.GetFollowersByUsername(username)
+		if err != nil {
+			h.Service.Logger.Print(err)
+			c.HTML(http.StatusOK, "err.html", gin.H{
+				"Session": s,
+				"Error": err.Error(),
+			})
+			
+			return
+		}
+
+		c.HTML(http.StatusOK, "followers.html", gin.H{
+			"Session": s,
+			"Users": users,
+		})
+	}
+}
