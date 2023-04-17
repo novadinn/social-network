@@ -9,6 +9,7 @@ import (
 
 	"github.com/novadinn/social-network/model"
 
+	"github.com/jmoiron/sqlx"
 	_  "github.com/go-sql-driver/mysql"
 )
 
@@ -61,6 +62,12 @@ WHERE username = ?`
 FROM posts 
 INNER JOIN users ON posts.user_id = users.id 
 ORDER BY posts.id DESC`
+	getFollowingPosts = `SELECT posts.*, users.username 
+FROM posts 
+INNER JOIN users ON posts.user_id = users.id 
+WHERE posts.user_id IN (?)
+ORDER BY posts.id DESC;`
+	
 	getPostsByUsername = `SELECT posts.*, users.username 
 FROM posts 
 INNER JOIN users ON posts.user_id = users.id 
@@ -290,6 +297,35 @@ func (q *Queries) CreateUserFollow(followerID, followedID string, createdAt time
 
 func (q *Queries) GetPosts() ([]model.Post, error) {
 	rows, err := q.db.Query(getPosts)
+	if err != nil {
+		return nil, err
+	}
+
+	posts := make([]model.Post, 0)
+	for rows.Next() {
+		var post model.Post
+		if err := rows.Scan(&post.ID, &post.UserID, &post.Content, &post.CreatedAt,
+			&post.Username); err != nil {
+			return posts, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err = rows.Err(); err != nil {
+        return posts, err
+    }
+
+	return posts, nil
+}
+
+func (q *Queries) GetFollowingPosts(ids []interface{}) ([]model.Post, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	
+	que, args, err := sqlx.In(getFollowingPosts, ids)
+	
+	rows, err := q.db.Query(que, args...)
 	if err != nil {
 		return nil, err
 	}

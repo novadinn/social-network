@@ -3,6 +3,8 @@ package handler
 import (
 	"net/http"
 
+	"github.com/novadinn/social-network/model"
+	
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,6 +23,27 @@ func (h *Handler) homeGetHandler() gin.HandlerFunc {
 			return
 		}
 
+		var followingPosts []model.Post
+		if s.IsLoggedIn {
+
+			users, err := h.Service.Queries.GetFollowingByUsername(s.User.Username)
+			ids := make([]interface{}, 0)
+			for _, v := range users {
+				ids = append(ids, v.ID)
+			}
+
+			followingPosts, err = h.Service.GetFollowingPosts(ids)
+			if err != nil {
+				h.Service.Logger.Print(err)
+				c.HTML(http.StatusOK, "err.html", gin.H{
+					"Session": s,
+					"Error": err.Error(),
+				})
+				
+				return
+			}
+		}
+
 		err = h.popErr("create_post_err")
 		form := h.popForm("create_post_form")
 
@@ -31,6 +54,7 @@ func (h *Handler) homeGetHandler() gin.HandlerFunc {
 				"Error": err.Error(),
 				"Form": form,
 				"Posts": posts,
+				"FollowPosts": followingPosts,
 			})
 
 			return
@@ -40,6 +64,7 @@ func (h *Handler) homeGetHandler() gin.HandlerFunc {
 			"Session": s,
 			"Form": form,
 			"Posts": posts,
+			"FollowPosts": followingPosts,
 		})
 	}
 }

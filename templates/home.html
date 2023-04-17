@@ -39,27 +39,80 @@
 	  </form>
 	  {{end}}
 
-	  {{if eq (len .Posts) 0}}
-	  <p>No posts yet.</p>
-	  {{else}}
-	  {{range $post := .Posts}}
-	  <article>
-		<div>
+	  <div class="tab">
+		{{if .Session.IsLoggedIn}}
+		<button class="tablinks" onclick="openPosts(event, 'for-you-tab')" id="defaultOpen">For you</button>
+		<button class="tablinks" onclick="openPosts(event, 'following-tab')">Following</button>
+		{{end}}
+	  </div>
 
-		  <a href="/@{{$post.Username}}">
-			<h2>{{$post.Username}}</h2>
-		  </a>
+	  <div id="for-you-tab" class="tabcontent">
+		{{if eq (len .Posts) 0}}
+		<p>No posts yet.</p>
+		{{else}}
+		{{range $post := .Posts}}
+		<article>
+		  <div>
 
-		  <a href="/p/{{$post.ID}}">
-			<time datetime="{{$post.CreatedAt}}">{{$post.CreatedAt}}</time>
-		  </a>
-		  
-		</div>
+			<a href="/@{{$post.Username}}">
+			  <h2>{{$post.Username}}</h2>
+			</a>
 
-		<p>{{$post.Content}}</p>
-	  </article>
+			<a href="/p/{{$post.ID}}">
+			  <time datetime="{{$post.CreatedAt}}">{{$post.CreatedAt}}</time>
+			</a>
+			
+		  </div>
+
+		  <p>{{$post.Content}}</p>
+		</article>
+		{{end}}
+		{{end}}
+	  </div>
+
+	  {{if .Session.IsLoggedIn}}
+	  <div id="following-tab" class="tabcontent">
+		{{if eq (len .FollowPosts) 0}}
+		<p>No posts yet.</p>
+		{{else}}
+		{{range $post := .FollowPosts}}
+		<article>
+		  <div>
+
+			<a href="/@{{$post.Username}}">
+			  <h2>{{$post.Username}}</h2>
+			</a>
+
+			<a href="/p/{{$post.ID}}">
+			  <time datetime="{{$post.CreatedAt}}">{{$post.CreatedAt}}</time>
+			</a>
+			
+		  </div>
+
+		  <p>{{$post.Content}}</p>
+		</article>
+		{{end}}
+		{{end}}
+	  </div>
 	  {{end}}
-	  {{end}}
+
+	  <script>
+		function openPosts(evt, cityName) {
+			var i, tabcontent, tablinks;
+			tabcontent = document.getElementsByClassName("tabcontent");
+			for (i = 0; i < tabcontent.length; i++) {
+				tabcontent[i].style.display = "none";
+			}
+			tablinks = document.getElementsByClassName("tablinks");
+			for (i = 0; i < tablinks.length; i++) {
+				tablinks[i].className = tablinks[i].className.replace(" active", "");
+			}
+			document.getElementById(cityName).style.display = "block";
+			evt.currentTarget.className += " active";
+		}
+
+		document.getElementById("defaultOpen").click();
+	  </script>
 	  
 	</main>
   </body>
