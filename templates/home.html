@@ -1,120 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<meta charset="utf-8">
-	<meta name="viewport" context="width=device-width, initial-scale=1.0">
-	<title>Social Network</title>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <meta charset="utf-8">
+    <meta name="viewport" context="width=device-width, initial-scale=1.0">
+    <title>Social Network</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
   </head>
   
   <body>
-	<header>
-	  <nav>
-		<a href="/">Home</a>
-		
-		{{if .Session.IsLoggedIn}}
-		<a href="/@{{.Session.User.Username}}">{{.Session.User.Username}}</a>
-		
-		<form action="/logout" method="POST" style="display: contents;">
-		  <button>Logout</button>
-		</form>
-		
-		{{else}}
-		<a href="/login">Login</a>
-		{{end}}
-	  </nav>
-	</header>
-	<hr>
+    <header>
+      <nav>
+	<img src="img/network.png" width="32" height="32">
+	<a href="/">Home</a>
 	
-	<main>
-	  <h1>Home</h1>
-	  {{if .Session.IsLoggedIn}}
-	  <form action="/posts" method="POST">
-		<textarea name="content" area-label="content" placeholder="What's new?"
-				  required>{{.Form.Get "content"}}</textarea>
-		{{with .Err}}
-		<p>Could not create post: <code>{{.Error}}</code></p>
-		{{end}}
-		<button>Post</button>
-	  </form>
-	  {{end}}
+	{{if .Session.IsLoggedIn}}
+	<a href="/@{{.Session.User.Username}}">{{.Session.User.Username}}</a>
+	
+	<form action="/logout" method="POST" style="display: contents;">
+	  <button>Logout</button>
+	</form>
+	
+	{{else}}
+	<a href="/login">Login</a>
+	{{end}}
+      </nav>
+    </header>
+    <hr>
+    
+    <main>
+      <h1>Home</h1>
+      {{if .Session.IsLoggedIn}}
+      <form action="/posts" method="POST">
+	<textarea name="content" area-label="content" placeholder="What's new?"
+		  required>{{.Form.Get "content"}}</textarea>
+	{{with .Err}}
+	<p>Could not create post: <code>{{.Error}}</code></p>
+	{{end}}
+	<button>Post</button>
+      </form>
+      {{end}}
 
-	  <div class="tab">
-		{{if .Session.IsLoggedIn}}
-		<button class="tablinks" onclick="openPosts(event, 'for-you-tab')" id="defaultOpen">For you</button>
-		<button class="tablinks" onclick="openPosts(event, 'following-tab')">Following</button>
-		{{end}}
+      <div class="tab">
+	{{if .Session.IsLoggedIn}}
+	<button class="tablinks" onclick="openPosts(event, 'for-you-tab')" id="defaultOpen">For you</button>
+	<button class="tablinks" onclick="openPosts(event, 'following-tab')">Following</button>
+	{{end}}
+      </div>
+
+      <div id="for-you-tab" class="tabcontent">
+	{{if eq (len .Posts) 0}}
+	<p>No posts yet.</p>
+	{{else}}
+	{{range $post := .Posts}}
+	<article>
+	  <div>
+
+	    <a href="/@{{$post.Username}}">
+	      <h2>{{$post.Username}}</h2>
+	    </a>
+
+	    <a href="/p/{{$post.ID}}">
+	      <time datetime="{{$post.CreatedAt}}">{{$post.CreatedAt}}</time>
+	    </a>
+	    
 	  </div>
 
-	  <div id="for-you-tab" class="tabcontent">
-		{{if eq (len .Posts) 0}}
-		<p>No posts yet.</p>
-		{{else}}
-		{{range $post := .Posts}}
-		<article>
-		  <div>
+	  <p>{{$post.Content}}</p>
+	</article>
+	{{end}}
+	{{end}}
+      </div>
 
-			<a href="/@{{$post.Username}}">
-			  <h2>{{$post.Username}}</h2>
-			</a>
+      {{if .Session.IsLoggedIn}}
+      <div id="following-tab" class="tabcontent">
+	{{if eq (len .FollowPosts) 0}}
+	<p>No posts yet.</p>
+	{{else}}
+	{{range $post := .FollowPosts}}
+	<article>
+	  <div>
 
-			<a href="/p/{{$post.ID}}">
-			  <time datetime="{{$post.CreatedAt}}">{{$post.CreatedAt}}</time>
-			</a>
-			
-		  </div>
+	    <a href="/@{{$post.Username}}">
+	      <h2>{{$post.Username}}</h2>
+	    </a>
 
-		  <p>{{$post.Content}}</p>
-		</article>
-		{{end}}
-		{{end}}
+	    <a href="/p/{{$post.ID}}">
+	      <time datetime="{{$post.CreatedAt}}">{{$post.CreatedAt}}</time>
+	    </a>
+	    
 	  </div>
 
-	  {{if .Session.IsLoggedIn}}
-	  <div id="following-tab" class="tabcontent">
-		{{if eq (len .FollowPosts) 0}}
-		<p>No posts yet.</p>
-		{{else}}
-		{{range $post := .FollowPosts}}
-		<article>
-		  <div>
+	  <p>{{$post.Content}}</p>
+	</article>
+	{{end}}
+	{{end}}
+      </div>
+      {{end}}
 
-			<a href="/@{{$post.Username}}">
-			  <h2>{{$post.Username}}</h2>
-			</a>
+      <script>
+	function openPosts(evt, cityName) {
+	    var i, tabcontent, tablinks;
+	    tabcontent = document.getElementsByClassName("tabcontent");
+	    for (i = 0; i < tabcontent.length; i++) {
+		tabcontent[i].style.display = "none";
+	    }
+	    tablinks = document.getElementsByClassName("tablinks");
+	    for (i = 0; i < tablinks.length; i++) {
+		tablinks[i].className = tablinks[i].className.replace(" active", "");
+	    }
+	    document.getElementById(cityName).style.display = "block";
+	    evt.currentTarget.className += " active";
+	}
 
-			<a href="/p/{{$post.ID}}">
-			  <time datetime="{{$post.CreatedAt}}">{{$post.CreatedAt}}</time>
-			</a>
-			
-		  </div>
+	document.getElementById("defaultOpen").click();
+      </script>
+      
+    </main>
 
-		  <p>{{$post.Content}}</p>
-		</article>
-		{{end}}
-		{{end}}
-	  </div>
-	  {{end}}
-
-	  <script>
-		function openPosts(evt, cityName) {
-			var i, tabcontent, tablinks;
-			tabcontent = document.getElementsByClassName("tabcontent");
-			for (i = 0; i < tabcontent.length; i++) {
-				tabcontent[i].style.display = "none";
-			}
-			tablinks = document.getElementsByClassName("tablinks");
-			for (i = 0; i < tablinks.length; i++) {
-				tablinks[i].className = tablinks[i].className.replace(" active", "");
-			}
-			document.getElementById(cityName).style.display = "block";
-			evt.currentTarget.className += " active";
-		}
-
-		document.getElementById("defaultOpen").click();
-	  </script>
-	  
-	</main>
-  </body>
-  
+    <footer>
+      
+      <h4>About us</h4>
+      <ul>
+	<li>E-mail@gmail.com</li>
+        <li>8-800-555-35-35</li>
+      </ul>      
+    </footer>
+    
+  </body>  
 </html>

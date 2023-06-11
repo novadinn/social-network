@@ -45,7 +45,8 @@ func New() *Handler {
 	h.Router.DELETE("/user-follows", h.userUnfollowDeleteHandler())
 	h.Router.GET("/@:username", h.userGetHandler())
 	h.Router.GET("/p/:id", h.postGetHandler())
-
+	h.Router.Static("/img", "templates/img")
+	
 	return &h
 }
 

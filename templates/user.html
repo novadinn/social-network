@@ -1,76 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<meta charset="utf-8">
-	<meta name="viewport" context="width=device-width, initial-scale=1.0">
-	<title>Social Network</title>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <meta charset="utf-8">
+    <meta name="viewport" context="width=device-width, initial-scale=1.0">
+    <title>Social Network</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
   </head>
   
   <body>
-	<header>
-	  <nav>
-		<a href="/">Home</a>
-		
-		{{if .Session.IsLoggedIn}}
-		<a href="/@{{.Session.User.Username}}">{{.Session.User.Username}}</a>
-		
-		<form action="/logout" method="POST" style="display: contents;">
-		  <button>Logout</button>
-		</form>
-		
-		{{else}}
-		<a href="/login">Login</a>
-		{{end}}
-	  </nav>
-	</header>
-	<hr>
+    <header>
+      <nav>
+	<img src="img/network.png" width="32" height="32">
+	<a href="/">Home</a>
 	
-	<main>
-	  <h1>{{.User.Username}}</h1>
+	{{if .Session.IsLoggedIn}}
+	<a href="/@{{.Session.User.Username}}">{{.Session.User.Username}}</a>
+	
+	<form action="/logout" method="POST" style="display: contents;">
+	  <button>Logout</button>
+	</form>
+	
+	{{else}}
+	<a href="/login">Login</a>
+	{{end}}
+      </nav>
+    </header>
+    <hr>
+    
+    <main>
+      <h1>{{.User.Username}}</h1>
 
-	  <a href="/@{{.User.Username}}/following">Following</a>
-	  <a href="/@{{.User.Username}}/followers">Followers</a>
+      <a href="/@{{.User.Username}}/following">Following</a>
+      <a href="/@{{.User.Username}}/followers">Followers</a>
+      
+      {{if and .Session.IsLoggedIn (ne .Session.User.ID .User.ID)}}
+      <form action="/user-follows" method="POST">
+	<input type="hidden" name="user_id" value="{{.User.ID}}">
+
+	{{if .User.Following}}
+	<input type="hidden" name="_method" value="DELETE">
+	{{end}}
+
+	{{with .Err}}
+	<p>Could not follow user: <code>{{.Error}}</code></p>
+	{{end}}
+	
+	<button>{{if .User.Following}}Following{{else}}Follow{{end}}</button>
+      </form>
+      {{end}}
+
+      <h2>Posts</h2>
+      {{if eq (len .Posts) 0}}
+      <p>No posts.</p>
+      {{else}}
+      {{range $post := .Posts}}
+      <article>
+	<div>
+
+	  <a href="/@{{$post.Username}}">
+	    <h2>{{$post.Username}}</h2>
+	  </a>
+
+	  <a href="/p/{{$post.ID}}">
+	    <time datetime="{{$post.CreatedAt}}">{{$post.CreatedAt}}</time>
+	  </a>
 	  
-	  {{if and .Session.IsLoggedIn (ne .Session.User.ID .User.ID)}}
-	  <form action="/user-follows" method="POST">
-		<input type="hidden" name="user_id" value="{{.User.ID}}">
+	</div>
 
-		{{if .User.Following}}
-		<input type="hidden" name="_method" value="DELETE">
-		{{end}}
+	<p>{{$post.Content}}</p>
+      </article>
+      {{end}}
+      {{end}}
+    </main>
 
-		{{with .Err}}
-		<p>Could not follow user: <code>{{.Error}}</code></p>
-		{{end}}
-		
-		<button>{{if .User.Following}}Following{{else}}Follow{{end}}</button>
-	  </form>
-	  {{end}}
-
-	  <h2>Posts</h2>
-	  {{if eq (len .Posts) 0}}
-	  <p>No posts.</p>
-	  {{else}}
-	  {{range $post := .Posts}}
-	  <article>
-		<div>
-
-		  <a href="/@{{$post.Username}}">
-			<h2>{{$post.Username}}</h2>
-		  </a>
-
-		  <a href="/p/{{$post.ID}}">
-			<time datetime="{{$post.CreatedAt}}">{{$post.CreatedAt}}</time>
-		  </a>
-		  
-		</div>
-
-		<p>{{$post.Content}}</p>
-	  </article>
-	  {{end}}
-	  {{end}}
-	</main>
+    <footer>
+      
+      <h4>About us</h4>
+      <ul>
+	<li>E-mail@gmail.com</li>
+        <li>8-800-555-35-35</li>
+      </ul>      
+    </footer>
+    
   </body>
   
 </html>
